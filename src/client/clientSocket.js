@@ -16,7 +16,7 @@ export default class ClientSocket {
   async awaitConnection() {
     console.log("connecting socket");
 
-    const socket = io("http://localhost:3000", { path: "/socket.io/" });
+    const socket = io(process.env.WEBSOCKET_URL);
 
     await new Promise((resolve) => {
       socket.on("connect", () => {
