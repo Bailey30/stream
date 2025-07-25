@@ -32,8 +32,6 @@ async function page() {
     video.srcObject = stream;
     video.play();
   }
-
-  socket.try();
 }
 
 page();
