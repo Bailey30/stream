@@ -99,17 +99,21 @@ export default class ServerSocket {
     this.io = io;
 
     io.on("connection", (socket) => {
-      this.onConnection(socket);
-
-      socket.on("disconnect", (reason) => this.onDisconnection(socket, reason));
-
-      socket.on("signal", (data) => this.sendSignal(data, socket));
-
-      socket.on("requestInitialData", () => this.onConnection(socket));
+      this.#onConnection(socket);
+      socket.on("requestRoom", () => this.#onRequestRoom());
+      socket.on("disconnect", (reason) =>
+        this.#onDisconnection(socket, reason),
+      );
+      socket.on("signal", (data) => this.#sendSignal(data, socket));
+      socket.on("requestInitialData", () => this.#onConnection(socket));
     });
   }
 
-  onConnection(socket) {
+  #onRequestRoom() {
+    this.io.emit("room", { room: Room.fields() });
+  }
+
+  #onConnection(socket) {
     console.log("user has connected", socket.id);
     console.log("[connected users]:", users.size);
 
@@ -124,7 +128,7 @@ export default class ServerSocket {
     });
   }
 
-  onDisconnection(socket, reason) {
+  #onDisconnection(socket, reason) {
     console.log("[user has disconnected]", socket.id);
     console.log(`[Reason: ${reason}]`);
     console.log("[connected users]:", users.size);
@@ -138,7 +142,7 @@ export default class ServerSocket {
     });
   }
 
-  sendSignal(data, socket) {
+  #sendSignal(data, socket) {
     console.log("[signal received]", data, "[sending signal]");
     this.io.to(Room.otherUser(socket.id)).emit("signal", data);
   }

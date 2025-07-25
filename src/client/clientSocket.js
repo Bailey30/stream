@@ -1,13 +1,10 @@
 import { io } from "socket.io-client";
-import ClientRTC from "./clientRTCPeer";
 
 export default class ClientSocket {
-  signallingService;
+  signallingService = null;
   id = null;
-  room = { initiator: null, viewer: null };
+  room = { initiator: undefined, viewer: undefined };
   socket = null;
-  rtc = null;
-  video = null;
 
   constructor(signallingService) {
     this.signallingService = signallingService;
@@ -17,53 +14,61 @@ export default class ClientSocket {
     console.log("connecting socket");
 
     const socket = io(process.env.WEBSOCKET_URL);
-
-    await new Promise((resolve) => {
-      socket.on("connect", () => {
-        console.log("[socket connected]");
-        // socket.emit("requestInitialData");
-        resolve();
-      });
-    });
-
     this.socket = socket;
+
+    await this.#once(socket, "connect");
+    console.log("[socket connected]");
+
+    this.id = socket.id;
     this.signallingService.socketClient = this;
-    this.signallingService.socket = this.socket;
-    this.listen();
+
+    socket.emit("requestRoom");
+
+    const roomData = await this.#once(socket, "room");
+    this.#onRoom(roomData);
+
+    this.#listen();
 
     return socket;
   }
 
-  listen() {
-    this.socket.on("signal", (data) => this.onSignal(data));
-    this.socket.on("userConnected", (data) => this.onPeerConnected(data));
-    this.socket.on("peerDisconnected", () => this.onPeerDisconnected());
+  isInitiator() {
+    console.log("[isInitiator]", this.id === this.room.initiator);
+    return this.id === this.room.initiator;
   }
 
-  onSignal(data) {
+  #listen() {
+    this.socket.on("signal", (data) => this.#onSignal(data));
+    this.socket.on("userConnected", (data) => this.#onPeerConnected(data));
+    this.socket.on("peerDisconnected", () => this.#onPeerDisconnected());
+  }
+
+  #onSignal(data) {
     this.signallingService.signalPeer(data);
   }
 
-  onPeerConnected(socket, data) {
-    const room = data.room;
-    console.log({ room });
+  #onPeerConnected(data) {
+    this.room = data.room;
 
     console.log(`[User connected: ${data.connected}]`);
-    console.log(`[Your id: ${socket.id}]`);
-    console.log(`[Room: initiator: ${room.initiator}, viewer: ${room.viewer}]`);
-
-    this.id = socket.id;
-
-    if (socket.id === room.initiator) {
-      this.room.initiator = socket.id;
-    }
+    console.log(`[Your id: ${this.socket.id}]`);
+    console.log(
+      `[Room: initiator: ${this.room.initiator}, viewer: ${this.room.viewer}]`,
+    );
   }
 
-  onPeerDisconnected() {
+  #onPeerDisconnected() {
+    console.log(this.room);
     this.signallingService.createPeer();
   }
 
-  isInitiator() {
-    return this.id === this.room.initiator;
+  #onRoom(data) {
+    this.room = data.room;
+  }
+
+  #once(emitter, eventName) {
+    return new Promise((resolve) => {
+      emitter.once(eventName, (data) => resolve(data));
+    });
   }
 }

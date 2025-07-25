@@ -1,48 +1,61 @@
 import SimplePeer from "simple-peer";
 
 export default class ClientRTC {
+  signallingService = null;
   peer = null;
-  signallingService;
+  isInitiator = false;
 
   constructor(signallingService, initiator = false, stream = undefined, video) {
     this.signallingService = signallingService;
 
-    this.createPeer(initiator, stream, video);
+    this.isInitiator = initiator;
+    this.stream = stream;
+    this.video = video;
+
+    this.createPeer(initiator);
   }
 
-  createPeer(initiator, stream, video) {
+  createPeer(initiator) {
     if (this.peer) {
       this.peer.removeAllListeners();
       this.peer.destroy();
     }
 
     console.log("[peer createPeer]");
-    const peer = new SimplePeer({ initiator, stream });
+    const peer = new SimplePeer({
+      initiator,
+      ...(this.stream && { stream: this.stream }),
+    });
 
     this.peer = peer;
-    this.signallingService.peer = this.peer;
+    this.signallingService.peerClient = this;
 
-    this.peer.on("signal", (data) => this.signallingService.emitSignal(data));
-    this.peer.on("connect", () => this.onConnect());
-    this.peer.on("stream", (stream) => this.onStream(stream, video));
-    this.peer.on("close", () => this.onClose());
-    this.peer.on("error", (err) => this.onError(err));
+    this.peer.on("signal", (data) => this.#onSignal(data));
+    this.peer.on("connect", () => this.#onConnect());
+    this.peer.on("stream", (stream) => this.#onStream(stream, this.video));
+    this.peer.on("close", () => this.#onClose());
+    this.peer.on("error", (err) => this.#onError(err));
   }
 
-  onConnect() {
+  #onSignal(data) {
+    this.signallingService.emitSignal(data);
+  }
+
+  #onConnect() {
     console.log("[Peer connected]", this.peer.connected);
   }
 
-  onStream(stream, video) {
+  #onStream(stream, video) {
+    console.log("[Viewer stream starting]");
     video.srcObject = stream;
     video.play();
   }
 
-  onClose() {
+  #onClose() {
     console.log("[peer closed]");
   }
 
-  onError(err) {
+  #onError(err) {
     console.error("[Peer error:]", err);
   }
 }

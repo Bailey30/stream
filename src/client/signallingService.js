@@ -1,17 +1,21 @@
 export default class SignallingService {
+  peerClient = null;
+  socketClient = null;
+
   constructor() {}
 
   signalPeer(data) {
     console.log("[signalling peer from service]");
-    this.peer.signal(data);
+    this.peerClient.peer.signal(data);
   }
 
   emitSignal(data) {
     console.log("[sending signal via websocket]");
-    this.socket.emit("signal", JSON.stringify(data));
+    this.socketClient.socket.emit("signal", JSON.stringify(data));
   }
 
   createPeer() {
-    this.peer.createPeer(this.socketClient.isInitiator());
+    console.log("[create peer]", this.peer, this.peerClient);
+    this.peerClient.createPeer(this.socketClient.isInitiator());
   }
 }
