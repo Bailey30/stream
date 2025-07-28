@@ -30,7 +30,7 @@ export default class ClientSocket {
     const roomData = await this.#awaitEvent(socket, "room");
     this.#onRoom(roomData);
 
-    this.listen();
+    this.#listen();
 
     return socket;
   }
@@ -44,7 +44,7 @@ export default class ClientSocket {
     return !!this.room.initiator;
   }
 
-  listen() {
+  #listen() {
     this.socket.on("signal", (data) => this.#onSignal(data));
     this.socket.on("userConnected", (data) => this.#onPeerConnected(data));
     this.socket.on("peerDisconnected", () => this.#onPeerDisconnected());

@@ -12,8 +12,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, "index.html"),
-        send: resolve(__dirname, "send/index.html"),
-        receive: resolve(__dirname, "receive/index.html"),
       },
     },
   },

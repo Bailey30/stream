@@ -39,7 +39,7 @@ async function join(signallingService, socket) {
 
   const stream = await getStream(socket);
 
-  // Initiate a peer client which is ready to create and handle a peer ocnnection.
+  // Initiate a peer client which is ready to create and handle a peer connection.
   const rtc = new ClientRTC(
     signallingService,
     socket.isInitiator(),
