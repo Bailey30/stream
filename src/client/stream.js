@@ -1,6 +1,6 @@
-import ClientRTC from "../src/client/clientRTCPeer.js";
-import ClientSocket from "../src/client/clientSocket.js";
-import SignallingService from "../src/client/signallingService.js";
+import ClientRTC from "./clientRTCPeer.js";
+import ClientSocket from "./clientSocket.js";
+import SignallingService from "./signallingService.js";
 
 const video = document.querySelector("video");
 const role = document.getElementById("role");
@@ -87,4 +87,5 @@ function updateUI(joinButton, role, connection, rtc, socket) {
     ? (joinButton.style.display = "none")
     : (joinButton.style.display = "block");
 }
+
 page();

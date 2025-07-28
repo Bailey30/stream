@@ -100,6 +100,7 @@ export default class ServerSocket {
 
     io.on("connection", (socket) => {
       this.#onConnection(socket);
+      socket.on("join", () => this.#onJoin(socket));
       socket.on("requestRoom", () => this.#onRequestRoom());
       socket.on("disconnect", (reason) =>
         this.#onDisconnection(socket, reason),
@@ -113,19 +114,27 @@ export default class ServerSocket {
     this.io.emit("room", { room: Room.fields() });
   }
 
-  #onConnection(socket) {
-    console.log("user has connected", socket.id);
-    console.log("[connected users]:", users.size);
-
+  #onJoin(socket) {
+    console.log("[joined]", socket.id);
     Room.join(socket.id);
     Room.log();
 
     console.log(Room.fields());
 
-    this.io.emit("userConnected", {
+    this.io.to(Room.otherUser(socket.id)).emit("userConnected", {
       connected: socket.id,
       room: Room.fields(),
     });
+
+    this.io.emit("joined", { room: Room.fields() });
+  }
+
+  #onConnection(socket) {
+    console.log("user has connected", socket.id);
+    console.log("[connected users]:", this.connections.length);
+
+    this.connections.push(socket.id);
+    console.log(this.connections);
   }
 
   #onDisconnection(socket, reason) {
@@ -140,6 +149,11 @@ export default class ServerSocket {
       disconnected: socket.id,
       room: Room.fields(),
     });
+
+    this.connections.splice(
+      this.connections.indexOf((connection) => connection === socket.id),
+      1,
+    );
   }
 
   #sendSignal(data, socket) {

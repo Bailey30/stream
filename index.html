@@ -1,14 +1,10 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Stream</title>
-  </head>
-  <body>
-    <div id="app">
-      <a href="/send/">Send</a>
-    </div>
+  <body id="send">
+    <video autoplay></video>
+    <button id="join">Join</button>
+    <p id="connection">Not connected</p>
+    <p id="role"></p>
+    <script src="/src/client/stream.js" type="module"></script>
   </body>
 </html>

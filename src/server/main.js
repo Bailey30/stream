@@ -9,7 +9,7 @@ dotenv.config();
 const app = express();
 const server = createServer(app);
 
-app.use((err, req, res, _) => {
+app.use((err, req, res, next) => {
   console.error("error:", err.stack);
   res.status(500).send("Something broke!");
 });
