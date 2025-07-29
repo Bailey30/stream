@@ -1,7 +1,6 @@
 export default class Room {
   static #initiator = null;
   static #viewer = null;
-  static #users = new Map();
 
   static set initiator(userId) {
     this.#initiator = userId;
@@ -39,22 +38,6 @@ export default class Room {
     if (this.#viewer === userId) {
       this.#viewer = null;
     }
-  }
-
-  static handleConnection(userId) {
-    const count = this.#users.get(userId) || 0;
-    this.#users.set(userId, count + 1);
-    return count === 0;
-  }
-
-  static handleDisconnection(userId) {
-    const count = this.#users.get(userId) - 1;
-    if (count === 0) {
-      this.#users.delete(userId);
-    } else {
-      this.#users.set(userId, count);
-    }
-    return count === 0;
   }
 
   static log() {

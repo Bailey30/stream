@@ -38,6 +38,8 @@ export default class ServerSocket {
 
     console.log(Room.fields());
 
+    // Only sends if other person already in room.
+    // Which they wont be until they click join.
     this.io.to(Room.otherUser(socket.id)).emit("userConnected", {
       connected: socket.id,
       room: Room.fields(),

@@ -47,16 +47,20 @@ export default class ClientSocket {
   #listen() {
     this.socket.on("signal", (data) => this.#onSignal(data));
     this.socket.on("userConnected", (data) => this.#onPeerConnected(data));
-    this.socket.on("peerDisconnected", () => this.#onPeerDisconnected());
+    this.socket.on("peerDisconnected", (data) =>
+      this.#onPeerDisconnected(data),
+    );
     this.socket.on("joined", (data) => this.#onJoin(data));
   }
 
   /**
    * Emits a "join" event to the websocket which stores the socket ID in an array of active connections.
+   * Saves the viewer and initiator of the room locally as other functions rely on that knowledge.
    **/
   async join() {
     this.socket.emit("join");
     const data = await this.#awaitEvent(this.socket, "joined");
+    // Needs to await this event so it can get information about the room before knowing if it is the initiator or not.
     this.room = data.room;
   }
 
@@ -85,8 +89,9 @@ export default class ClientSocket {
     this.signallingService.createPeer();
   }
 
-  #onPeerDisconnected() {
+  #onPeerDisconnected(data) {
     console.log("[peer peerDisconnected from websocket]");
+    this.room = data.room;
   }
 
   #onRoom(data) {
