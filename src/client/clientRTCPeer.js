@@ -8,7 +8,6 @@ export default class ClientRTC {
 
   constructor(signallingService, initiator = false, stream = undefined, video) {
     this.signallingService = signallingService;
-
     this.isInitiator = initiator;
     this.stream = stream;
     this.video = video;
