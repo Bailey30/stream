@@ -17,6 +17,7 @@ async function getStream(socket) {
       })
       .catch((err) => {
         console.error("error while getting media device", err);
+        alert(err);
       });
   }
 }
