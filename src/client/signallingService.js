@@ -19,4 +19,8 @@ export default class SignallingService {
     console.log("[create peer]", this.peerClient);
     this.peerClient.createPeer();
   }
+
+  callEnded() {
+    this.peerClient.callEnded();
+  }
 }

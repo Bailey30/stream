@@ -15,7 +15,7 @@ export default class ClientRTC {
   }
 
   createPeer(callback) {
-    this.#destroy();
+    this.destroy();
 
     console.log("[initiator]", this.isInitiator);
     console.log("[peer createPeer]");
@@ -78,14 +78,27 @@ export default class ClientRTC {
     console.error("[Peer error:]", err);
   }
 
-  #destroy() {
-    console.log("[destroying peer]");
+  destroy() {
     if (this.peer) {
+      console.log("[destroying peer]");
       this.peer.removeAllListeners();
       this.peer.destroy();
       this.peer = null;
       this.connected = false;
+      if (this.video.srcObject) {
+        this.video.srcObject.getVideoTracks().forEach((track) => {
+          track.stop();
+          this.video.srcObject.removeTrack(track);
+        });
+      }
+      this.video.srcObject = null;
+      this.video.pause();
     }
+  }
+
+  callEnded() {
+    this.destroy();
+    this.#UpdateUI();
   }
 
   #UpdateUI() {

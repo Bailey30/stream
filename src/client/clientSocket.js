@@ -14,19 +14,18 @@ export default class ClientSocket {
   }
 
   async awaitConnection() {
-    console.log("connecting socket");
+    console.log("[connecting socket]");
 
     const socket = io(process.env.WEBSOCKET_URL);
     this.socket = socket;
-
     await this.#awaitEvent(socket, "connect");
+
     console.log("[socket connected]");
 
     this.id = socket.id;
     this.signallingService.socketClient = this;
 
     socket.emit("requestRoom");
-
     const roomData = await this.#awaitEvent(socket, "room");
     this.#onRoom(roomData);
 
@@ -51,6 +50,7 @@ export default class ClientSocket {
       this.#onPeerDisconnected(data),
     );
     this.socket.on("joined", (data) => this.#onJoin(data));
+    this.socket.on("callEnded", () => this.#onCallEnded());
   }
 
   /**
@@ -62,6 +62,18 @@ export default class ClientSocket {
     const data = await this.#awaitEvent(this.socket, "joined");
     // Needs to await this event so it can get information about the room before knowing if it is the initiator or not.
     this.room = data.room;
+  }
+
+  leave() {
+    this.socket.emit("leave");
+  }
+
+  #onCallEnded() {
+    console.log("[call ended]");
+    this.room = { initiator: undefined, viewer: undefined };
+    try {
+      this.signallingService.callEnded();
+    } catch (error) {}
   }
 
   on(event, callback) {

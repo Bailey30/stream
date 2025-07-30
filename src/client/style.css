@@ -113,6 +113,17 @@ h6 {
   cursor: pointer;
 }
 
+.end_call {
+  height: 45px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  border: none;
+  background-color: red;
+  display: none;
+  margin-left: 20px;
+  cursor: pointer;
+}
+
 .connection,
 .role {
   padding: 5px;

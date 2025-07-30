@@ -18,6 +18,7 @@ export default class ServerSocket {
     io.on("connection", (socket) => {
       this.#onConnection(socket);
       socket.on("join", () => this.#onJoin(socket));
+      socket.on("leave", () => this.#onLeave(socket));
       socket.on("requestRoom", () => this.#onRequestRoom());
       socket.on("disconnect", (reason) =>
         this.#onDisconnection(socket, reason),
@@ -48,11 +49,25 @@ export default class ServerSocket {
     this.io.emit("joined", { room: Room.fields() });
   }
 
+  #onLeave(socket) {
+    Room.log();
+    console.log("[left room]", socket.id);
+    const otherUser = Room.otherUser(socket.id);
+    Room.leave(socket.id);
+    Room.leave(otherUser);
+    Room.log();
+    this.io.emit("callEnded");
+  }
+
   #onConnection(socket) {
     console.log("user has connected", socket.id);
-    console.log("[connected users]:", this.connections.length);
 
-    this.connections.push(socket.id);
+    if (this.connections.length <= 2) {
+      this.connections.push(socket.id);
+    } else {
+      console.log("more than 2 connections attempted");
+    }
+    console.log("[connected users]:", this.connections.length);
     console.log(this.connections);
   }
 
@@ -75,7 +90,6 @@ export default class ServerSocket {
   }
 
   #sendSignal(data, socket) {
-    console.log("[signal received]", data, "[sending signal]");
     this.io.to(Room.otherUser(socket.id)).emit("signal", data);
   }
 }

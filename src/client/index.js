@@ -7,12 +7,17 @@ const connection = document.getElementById("connection");
 const joinButton = document.getElementById("join");
 const initator_icon = document.getElementById("initiator_icon");
 const viewer_icon = document.getElementById("viewer_icon");
+const endCallButton = document.getElementById("end_call");
 
 async function getStream(socket) {
   if (socket.isInitiator()) {
-    return await navigator.mediaDevices.getUserMedia({
-      video: true,
-    });
+    return await navigator.mediaDevices
+      .getUserMedia({
+        video: true,
+      })
+      .catch((err) => {
+        console.error("error while getting media device", err);
+      });
   }
 }
 
@@ -24,17 +29,34 @@ async function page() {
   joinButton.innerText = socketClient.roomActive() ? "Join" : "Initiate";
   socketClient.on("joined", () => {
     if (!socketClient.isInitiator()) {
+      console.log("other user joined");
       joinButton.innerText = socketClient.roomActive() ? "Join" : "Initiate";
+    }
+  });
+  socketClient.on("callEnded", () => {
+    console.log("call ended but no peerclient");
+    if (!socketClient.signallingService.peerClient) {
+      joinButton.innerText = "Initiate";
     }
   });
 
   joinButton.addEventListener("click", async () => {
     await socketClient.join();
-    await joinAsPeer(signallingService, socketClient, joinButton);
+    await joinAsPeer(
+      signallingService,
+      socketClient,
+      joinButton,
+      endCallButton,
+    );
   });
 }
 
-async function joinAsPeer(signallingService, socket, joinButton) {
+async function joinAsPeer(
+  signallingService,
+  socket,
+  joinButton,
+  endCallButton,
+) {
   joinButton.disabled = true;
   const stream = await getStream(socket);
 
@@ -45,7 +67,9 @@ async function joinAsPeer(signallingService, socket, joinButton) {
     socket.isInitiator() && stream,
     video,
   );
-  rtc.setUIFunc(() => updateUI(joinButton, connection, rtc, socket));
+  rtc.setUIFunc(() =>
+    updateUI(joinButton, endCallButton, connection, rtc, socket),
+  );
 
   // Initiator creates a room with "join".
   // Other peer joins room and triggers "userConnected" event while creating their own peer.
@@ -63,9 +87,24 @@ async function joinAsPeer(signallingService, socket, joinButton) {
     // The initiator calls createPeer when the other user connects (in socket.onPeerConnected())
     rtc.createPeer();
   }
+
+  endCallButton.addEventListener("click", () => {
+    endCall(socket, joinButton);
+  });
+
+  window.addEventListener("beforeunload", () => {
+    console.log("on before unload");
+    endCall(socket, joinButton);
+  });
 }
 
-function updateUI(joinButton, connection, rtc, socket) {
+function endCall(socketClient, joinButton) {
+  console.log("ending call");
+  socketClient.leave();
+}
+
+function updateUI(joinButton, endCallButton, connection, rtc, socket) {
+  console.log("updatng ui");
   if (rtc.isInitiator) {
     initator_icon.style.display = "block";
     viewer_icon.style.display = "none";
@@ -77,15 +116,21 @@ function updateUI(joinButton, connection, rtc, socket) {
   connection.innerText = rtc.connected ? "Connected" : "Not connected";
 
   const roomActive = socket.roomActive();
+  console.log({ roomActive });
 
-  rtc.connected
-    ? (joinButton.style.display = "none")
-    : (joinButton.style.display = "block");
+  if (rtc.connected) {
+    joinButton.style.display = "none";
+    endCallButton.style.display = "block";
+  } else {
+    joinButton.style.display = "block";
+    endCallButton.style.display = "none";
+  }
 
   if (!roomActive) {
     joinButton.innerText = "Initiate";
     joinButton.disabled = false;
     viewer_icon.style.display = "none";
+    initator_icon.style.display = "none";
   } else if (rtc.isInitiator && !rtc.connected) {
     initator_icon.style.display = "none";
   } else if (rtc.isInitiator) {

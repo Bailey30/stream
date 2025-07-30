@@ -32,6 +32,7 @@ export default class Room {
   }
 
   static leave(userId) {
+    console.log({ userId });
     if (this.#initiator === userId) {
       this.#initiator = null;
     }
