@@ -14,7 +14,8 @@ async function getStream(socket) {
     const permissionStatus = await navigator.permissions.query({
       name: "camera",
     });
-    console.log({ permissionStatus });
+    console.log(permissionStatus);
+    alert(permissionStatus.state);
 
     if (permissionStatus.state !== "granted") {
       // Camera access is granted
