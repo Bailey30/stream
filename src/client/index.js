@@ -11,6 +11,17 @@ const endCallButton = document.getElementById("end_call");
 
 async function getStream(socket) {
   if (socket.isInitiator()) {
+    const permissionStatus = await navigator.permissions.query({
+      name: "camera",
+    });
+    console.log({ permissionStatus });
+
+    if (permissionStatus.state !== "granted") {
+      // Camera access is granted
+      alert("camera permission not granted");
+      return;
+    }
+
     return await navigator.mediaDevices
       .getUserMedia({
         video: true,
