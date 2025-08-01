@@ -1,11 +1,15 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  /* font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif; */
+  font-family: "Geist", sans-serif;
+  font-optical-sizing: auto;
+  /* font-weight: <weight>; */
+  font-style: normal;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #252525;
+  background-color: white;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -95,7 +99,7 @@ h6 {
   position: absolute;
   bottom: 0;
   display: flex;
-  padding: 10px;
+  padding: 15px;
   justify-content: center;
   align-items: center;
   width: 100%;
@@ -107,10 +111,12 @@ h6 {
   min-width: 100px;
   border: none;
   margin-left: 5px;
-  background-color: lightcoral;
-  color: white;
-  font-weight: 500;
+  background-color: #30a84e;
+  background-color: #58dc57;
+  color: black;
+  font-weight: 700;
   cursor: pointer;
+  font-family: "Geist";
 }
 
 .end_call {
@@ -118,10 +124,14 @@ h6 {
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   border: none;
-  background-color: red;
+  background-color: #ea3d2e;
+  background-color: #f84fae;
   display: none;
   margin-left: 20px;
   cursor: pointer;
+  color: black;
+  align-items: center;
+  justify-content: center;
 }
 
 .connection,

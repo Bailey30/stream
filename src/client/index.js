@@ -9,6 +9,10 @@ const initator_icon = document.getElementById("initiator_icon");
 const viewer_icon = document.getElementById("viewer_icon");
 const endCallButton = document.getElementById("end_call");
 
+const JOIN = "JOIN";
+const INITIATE = "INITIATE";
+const WAITING = "WAITING FOR PEER...";
+
 async function getStream(socket) {
   if (socket.isInitiator()) {
     return await navigator.mediaDevices
@@ -24,7 +28,6 @@ async function getStream(socket) {
     name: "camera",
   });
   console.log(permissionStatus);
-  alert(permissionStatus.state);
 
   if (permissionStatus.state !== "granted") {
     // Camera access is granted
@@ -37,19 +40,19 @@ async function page() {
   const socketClient = new ClientSocket(signallingService);
   await socketClient.awaitConnection();
 
-  joinButton.innerText = socketClient.roomActive() ? "Join" : "Initiate";
+  joinButton.innerText = socketClient.roomActive() ? JOIN : INITIATE;
 
   socketClient.on("joined", () => {
     if (!socketClient.isInitiator()) {
       console.log("other user joined");
-      joinButton.innerText = socketClient.roomActive() ? "Join" : "Initiate";
+      joinButton.innerText = socketClient.roomActive() ? JOIN : INITIATE;
     }
   });
 
   socketClient.on("callEnded", () => {
     console.log("call ended but no peerclient");
     if (!socketClient.signallingService.peerClient) {
-      joinButton.innerText = "Initiate";
+      joinButton.innerText = INITIATE;
     }
   });
 
@@ -97,7 +100,7 @@ async function joinAsPeer(
     console.log("[initiator video starting]");
     video.srcObject = stream;
     video.play();
-    joinButton.innerText = "Waiting for peer...";
+    joinButton.innerText = WAITING;
   } else {
     // The initiator calls createPeer when the other user connects (in socket.onPeerConnected())
     rtc.createPeer();
@@ -134,31 +137,25 @@ function updateUI(joinButton, endCallButton, connection, rtc, socket) {
 
   if (rtc.connected) {
     joinButton.style.display = "none";
-    endCallButton.style.display = "block";
+    endCallButton.style.display = "flex";
   } else {
     joinButton.style.display = "block";
     endCallButton.style.display = "none";
   }
 
   if (!roomActive) {
-    joinButton.innerText = "Initiate";
+    joinButton.innerText = INITIATE;
     joinButton.disabled = false;
     viewer_icon.style.display = "none";
     initator_icon.style.display = "none";
   } else if (rtc.isInitiator && !rtc.connected) {
     initator_icon.style.display = "none";
   } else if (rtc.isInitiator) {
-    joinButton.innerText = "Waiting for peer...";
+    joinButton.innerText = WAITING;
     joinButton.disabled = true;
   } else {
-    joinButton.innerText = "Initiate";
+    joinButton.innerText = INITIATE;
     joinButton.disabled = false;
-  }
-
-  if (rtc.video.srcObject) {
-    video.classList.add("border");
-  } else {
-    video.classList.remove("border");
   }
 }
 
