@@ -124,11 +124,11 @@ function endCall(socketClient) {
 function updateUI(joinButton, endCallButton, connection, rtc, socket) {
   console.log("updatng ui");
   if (rtc.isInitiator) {
-    initator_icon.style.display = "block";
+    initator_icon.style.display = "flex";
     viewer_icon.style.display = "none";
   } else {
     initator_icon.style.display = "none";
-    viewer_icon.style.display = "block";
+    viewer_icon.style.display = "flex";
   }
 
   connection.innerText = rtc.connected ? "Connected" : "Not connected";
