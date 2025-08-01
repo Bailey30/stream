@@ -62,6 +62,7 @@ export default class ClientRTC {
 
   #onStream(stream, video) {
     console.log("[Viewer stream starting]");
+    console.log({ stream });
     video.srcObject = stream;
     video.play();
   }

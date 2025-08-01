@@ -62,7 +62,9 @@ async function joinAsPeer(
 ) {
   joinButton.disabled = true;
   const stream = await getStream(socket);
-
+  if (stream === undefined && socket.isInitiator()) {
+    alert("Stream is undefined");
+  }
   // Initiate a peer client which is ready to create and handle a peer connection.
   const rtc = new ClientRTC(
     signallingService,

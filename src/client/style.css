@@ -137,7 +137,7 @@ h6 {
 
 .connection_icon {
   display: none;
-  line-height: 0;
+  line-height: 1.5;
   margin-top: 2px;
   font-size: 1.75em;
 }
