@@ -131,7 +131,7 @@ function updateUI(joinButton, endCallButton, connection, rtc, socket) {
     viewer_icon.style.display = "flex";
   }
 
-  connection.innerText = rtc.connected ? "Connected" : "Not connected";
+  connection.innerText = rtc.connected ? "CONNECTED" : "NOT CONNECTED";
 
   const roomActive = socket.roomActive();
 
