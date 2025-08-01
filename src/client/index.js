@@ -11,19 +11,6 @@ const endCallButton = document.getElementById("end_call");
 
 async function getStream(socket) {
   if (socket.isInitiator()) {
-    alert("alert");
-    const permissionStatus = await navigator.permissions.query({
-      name: "camera",
-    });
-    console.log(permissionStatus);
-    alert(permissionStatus.state);
-
-    if (permissionStatus.state !== "granted") {
-      // Camera access is granted
-      alert("camera permission not granted");
-      return;
-    }
-
     return await navigator.mediaDevices
       .getUserMedia({
         video: true,
@@ -32,6 +19,16 @@ async function getStream(socket) {
         console.error("error while getting media device", err);
         alert(err);
       });
+  }
+  const permissionStatus = await navigator.permissions.query({
+    name: "camera",
+  });
+  console.log(permissionStatus);
+  alert(permissionStatus.state);
+
+  if (permissionStatus.state !== "granted") {
+    // Camera access is granted
+    alert("camera permission not granted");
   }
 }
 
