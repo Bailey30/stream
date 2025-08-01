@@ -28,12 +28,14 @@ async function page() {
   await socketClient.awaitConnection();
 
   joinButton.innerText = socketClient.roomActive() ? "Join" : "Initiate";
+
   socketClient.on("joined", () => {
     if (!socketClient.isInitiator()) {
       console.log("other user joined");
       joinButton.innerText = socketClient.roomActive() ? "Join" : "Initiate";
     }
   });
+
   socketClient.on("callEnded", () => {
     console.log("call ended but no peerclient");
     if (!socketClient.signallingService.peerClient) {
@@ -90,16 +92,16 @@ async function joinAsPeer(
   }
 
   endCallButton.addEventListener("click", () => {
-    endCall(socket, joinButton);
+    endCall(socket);
   });
 
   window.addEventListener("beforeunload", () => {
     console.log("on before unload");
-    endCall(socket, joinButton);
+    endCall(socket);
   });
 }
 
-function endCall(socketClient, joinButton) {
+function endCall(socketClient) {
   console.log("ending call");
   socketClient.leave();
 }
@@ -117,7 +119,6 @@ function updateUI(joinButton, endCallButton, connection, rtc, socket) {
   connection.innerText = rtc.connected ? "Connected" : "Not connected";
 
   const roomActive = socket.roomActive();
-  console.log({ roomActive });
 
   if (rtc.connected) {
     joinButton.style.display = "none";
@@ -140,6 +141,12 @@ function updateUI(joinButton, endCallButton, connection, rtc, socket) {
   } else {
     joinButton.innerText = "Initiate";
     joinButton.disabled = false;
+  }
+
+  if (rtc.video.srcObject) {
+    video.classList.add("border");
+  } else {
+    video.classList.remove("border");
   }
 }
 

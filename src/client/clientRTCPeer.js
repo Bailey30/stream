@@ -14,24 +14,25 @@ export default class ClientRTC {
     this.signallingService.peerClient = this;
   }
 
-  createPeer(callback) {
-    this.destroy();
+  createPeer() {
+    this.#destroy();
 
     console.log("[initiator]", this.isInitiator);
     console.log("[peer createPeer]");
 
-    const peer = new SimplePeer({
+    this.peer = new SimplePeer({
       initiator: this.isInitiator,
       ...(this.stream && { stream: this.stream }),
     });
 
-    this.peer = peer;
-
-    if (callback) {
-      callback(peer);
-    }
-
     this.#listen();
+  }
+
+  on(event, callback) {
+    console.log(`setting callback: ${event}`, this.peer);
+    this.peer.on(event, () => {
+      callback(this.peer);
+    });
   }
 
   #listen() {
@@ -55,13 +56,6 @@ export default class ClientRTC {
     this.#UpdateUI();
   }
 
-  on(event, callback) {
-    console.log(`setting callback: ${event}`, this.peer);
-    this.peer.on(event, () => {
-      callback(this.peer);
-    });
-  }
-
   #onStream(stream, video) {
     console.log("[Viewer stream starting]");
     video.srcObject = stream;
@@ -78,26 +72,28 @@ export default class ClientRTC {
     console.error("[Peer error:]", err);
   }
 
-  destroy() {
+  #destroy() {
     if (this.peer) {
       console.log("[destroying peer]");
       this.peer.removeAllListeners();
       this.peer.destroy();
       this.peer = null;
       this.connected = false;
+
       if (this.video.srcObject) {
         this.video.srcObject.getVideoTracks().forEach((track) => {
           track.stop();
           this.video.srcObject.removeTrack(track);
         });
       }
+
       this.video.srcObject = null;
       this.video.pause();
     }
   }
 
   callEnded() {
-    this.destroy();
+    this.#destroy();
     this.#UpdateUI();
   }
 

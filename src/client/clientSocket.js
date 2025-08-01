@@ -17,11 +17,11 @@ export default class ClientSocket {
     console.log("[connecting socket]");
 
     const socket = io(process.env.WEBSOCKET_URL);
-    this.socket = socket;
     await this.#awaitEvent(socket, "connect");
 
     console.log("[socket connected]");
 
+    this.socket = socket;
     this.id = socket.id;
     this.signallingService.socketClient = this;
 
