@@ -12,6 +12,10 @@ export default class ClientRTC {
     this.stream = stream;
     this.video = video;
     this.signallingService.peerClient = this;
+
+    if (initiator && !stream) {
+      alert("initiator and no stream");
+    }
   }
 
   createPeer() {
