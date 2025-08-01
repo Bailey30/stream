@@ -11,6 +11,7 @@ const endCallButton = document.getElementById("end_call");
 
 async function getStream(socket) {
   if (socket.isInitiator()) {
+    alert("alert");
     const permissionStatus = await navigator.permissions.query({
       name: "camera",
     });
